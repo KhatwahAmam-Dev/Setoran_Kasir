@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rekapitulasi Kasir & Google Sheets Sync</title>
+  <title>Rekapitulasi Kasir & Setoran Bank</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="css/style.css" />
-  <script src="js/apps.js" defer> </script>
+  <style>
+   
+  </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen p-4 md:p-8">
 
@@ -16,22 +17,22 @@
     <header class="bg-indigo-700 text-white p-6 rounded-2xl shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
       <div>
         <h1 class="text-2xl font-bold">Aplikasi Rekap Setoran Kasir</h1>
-        <p class="text-indigo-200 text-sm">Hitung Denominasi Uang Fisik, Rekap Sales, Selisih Kas & Google Sheets Sync</p>
+        <p class="text-indigo-200 text-sm">Hitung Denominasi Uang Fisik, Rekap Sales, & Modal Shift</p>
       </div>
       <div class="bg-indigo-800 px-4 py-2 rounded-xl text-right w-full md:w-auto flex justify-between md:block items-center">
-        <span class="text-xs text-indigo-300 block">Patokan Uang Modal</span>
+        <span class="text-xs text-indigo-300 block">Patokan Uang Modal (Terpisah)</span>
         <span class="text-lg font-bold text-emerald-400">Rp 500.000</span>
       </div>
     </header>
 
-    <!-- Alert Notification -->
+    <!-- Peringatan / Alert Notification -->
     <div id="alertBox" class="hidden p-4 bg-amber-100 border-l-4 border-amber-500 text-amber-800 rounded-r shadow-sm no-print">
       <p class="font-medium text-sm" id="alertMessage"></p>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       
-      <!-- Panel Input Kiri -->
+      <!-- Panel Input Kiri (Disembunyikan saat Cetak PDF) -->
       <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-6 no-print">
         
         <!-- Section 1: Metadata Shift -->
@@ -87,31 +88,16 @@
           <div class="grid grid-cols-2 md:grid-cols-3 gap-3" id="koinContainer"></div>
         </div>
 
-        <!-- Section 3: Komparasi System & Audit Selisih Kas -->
-        <div>
-          <h2 class="text-base font-semibold mb-3 text-slate-700 border-b pb-2">3. Audit Sales System vs Fisik</h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-semibold text-slate-500 mb-1">TOTAL SALES SYSTEM / POS (Rp)</label>
-              <input type="number" id="salesSystem" placeholder="Contoh: 1250000" oninput="hitungTotalAkumulasi()" class="w-full border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none font-semibold text-slate-700">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-500 mb-1">CATATAN / ALASAN SELISIH</label>
-              <input type="text" id="catatanSelisih" placeholder="Contoh: Kembalian kurang 1rb" class="w-full border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-            </div>
-          </div>
-        </div>
-
         <button onclick="tambahTransaksi()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl transition shadow">
           + Tambahkan Log Ke Subtotal Shift
         </button>
       </div>
 
-      <!-- Panel Kanan: Rekapitulasi & Google Sheets Sync -->
+      <!-- Panel Kanan: Rekapitulasi Setoran & Action Buttons -->
       <div class="space-y-6 lg:col-span-1">
         
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
-          <h2 class="text-base font-semibold text-slate-700 border-b pb-2">4. Rekapitulasi Setoran Bank</h2>
+          <h2 class="text-base font-semibold text-slate-700 border-b pb-2">3. Rekapitulasi Setoran Bank</h2>
           
           <div class="space-y-2 text-sm">
             <div class="flex justify-between items-center py-1">
@@ -119,44 +105,26 @@
               <span class="font-bold text-slate-800" id="displayTotalFisik">Rp 0</span>
             </div>
             <div class="flex justify-between items-center py-1 border-b pb-2">
-              <span class="text-slate-500">Modal Shift (Wajib Ditinggal):</span>
-              <span class="font-bold text-red-500" id="displayModal">- Rp 500.000</span>
+              <span class="text-slate-500">Uang Modal (Catatan/Terpisah):</span>
+              <span class="font-bold text-slate-600" id="displayModal">Rp 500.000</span>
             </div>
             <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200">
-              <span class="text-xs text-emerald-600 font-semibold block uppercase">Total Murni Sales (Setor Bank):</span>
+              <span class="text-xs text-emerald-600 font-semibold block uppercase">Total Setor Bank:</span>
               <span class="text-2xl font-extrabold text-emerald-700" id="displaySetorBank">Rp 0</span>
             </div>
-
-            <!-- Box Status Selisih Kas -->
-            <div class="p-3 bg-slate-100 rounded-xl border border-slate-200 space-y-1">
-              <div class="flex justify-between items-center text-xs">
-                <span class="text-slate-500">Sales System (POS):</span>
-                <span class="font-bold text-slate-700" id="displaySalesSystem">Rp 0</span>
-              </div>
-              <div class="flex justify-between items-center text-xs">
-                <span class="text-slate-500">Audit Selisih Kas:</span>
-                <span class="font-bold" id="displaySelisih">Rp 0</span>
-              </div>
-            </div>
           </div>
 
-          <!-- Indikator Status Uang Modal -->
-          <div id="modalStatusBox" class="p-3 text-xs rounded-lg bg-slate-100 text-slate-600">
-            Status Modal: Belum dihitung
+          <!-- Indikator Informasi Modal -->
+          <div id="modalStatusBox" class="p-3 text-xs rounded-lg bg-blue-50 text-blue-800 border border-blue-200">
+            ℹ️ Uang Modal (Rp 500.000) dihitung terpisah dan tidak mengurangi total setoran.
           </div>
 
-          <!-- Action Buttons -->
+          <!-- Tombol Cetak PDF & Clear Data -->
           <div class="pt-2 space-y-2 no-print">
-            <button onclick="kirimKeGoogleSheets()" id="btnSync" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl transition shadow flex items-center justify-center gap-2 text-sm">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-              Kirim & Sync ke Google Sheets
-            </button>
-
             <button onclick="window.print()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl transition shadow flex items-center justify-center gap-2 text-sm">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002-2H7a2 2 0 00-2 2v4a2 2 0 002 2h10"></path></svg>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002-2H7a2 2 0 00-2 2v4a2 2 0 002 2h10i"></path></svg>
               Cetak / Save PDF Struk
             </button>
-
             <button onclick="resetSemuaData()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium py-2 rounded-xl transition text-xs">
               Reset Semua Data Shift
             </button>
@@ -178,57 +146,221 @@
     </div>
   </div>
 
-  
+  <script>
+    const MODAL_TETAP = 500000;
+    const kertasList = [100000, 75000, 50000, 20000, 10000, 5000, 2000, 1000];
+    const koinList = [1000, 500, 200, 100, 50, 25];
+    let listData = [];
+
+    // Load data awal dari LocalStorage browser
+    function initApp() {
+      document.getElementById('tanggalInput').valueAsDate = new Date();
+      renderInputs();
+      
+      const savedData = localStorage.getItem('rekapKasirData');
+      if (savedData) {
+        try {
+          listData = JSON.parse(savedData);
+          renderList();
+        } catch (e) {
+          listData = [];
+        }
+      }
+      hitungTotalAkumulasi();
+    }
+
+    // Render kotak input pecahan lembar/koin
+    function renderInputs() {
+      const kertasBox = document.getElementById('kertasContainer');
+      const koinBox = document.getElementById('koinContainer');
+
+      kertasBox.innerHTML = '';
+      koinBox.innerHTML = '';
+
+      kertasList.forEach(val => {
+        kertasBox.innerHTML += `
+          <div class="bg-slate-50 p-2 rounded-lg border border-slate-200">
+            <label class="block text-[11px] font-medium text-slate-500 mb-0.5">Rp ${val.toLocaleString('id-ID')}</label>
+            <input type="number" min="0" max="9999" placeholder="0" data-val="${val}" 
+              oninput="hitungTotalAkumulasi()" class="input-x w-full border rounded p-1.5 text-sm text-right font-semibold text-slate-700 focus:ring-2 focus:ring-indigo-500 outline-none">
+          </div>`;
+      });
+
+      koinList.forEach(val => {
+        koinBox.innerHTML += `
+          <div class="bg-slate-50 p-2 rounded-lg border border-slate-200">
+            <label class="block text-[11px] font-medium text-slate-500 mb-0.5">Rp ${val.toLocaleString('id-ID')}</label>
+            <input type="number" min="0" max="9999" placeholder="0" data-val="${val}" 
+              oninput="hitungTotalAkumulasi()" class="input-x w-full border rounded p-1.5 text-sm text-right font-semibold text-slate-700 focus:ring-2 focus:ring-indigo-500 outline-none">
+          </div>`;
+      });
+    }
+
+    // Kalkulasi Real-time
+    function hitungTotalAkumulasi() {
+      const inputs = document.querySelectorAll('.input-x');
+      let totalCurrentInput = 0;
+
+      inputs.forEach(input => {
+        const x = parseInt(input.value) || 0;
+        const val = parseInt(input.getAttribute('data-val'));
+        totalCurrentInput += x * val;
+      });
+
+      const grandTotalFisik = listData.reduce((acc, curr) => acc + curr.total, 0) + totalCurrentInput;
+      updateDisplay(grandTotalFisik);
+    }
+
+    // Update tampilan angka (tanpa dikurangi modal)
+    function updateDisplay(totalFisik) {
+      document.getElementById('displayTotalFisik').innerText = `Rp ${totalFisik.toLocaleString('id-ID')}`;
+      document.getElementById('displaySetorBank').innerText = `Rp ${totalFisik.toLocaleString('id-ID')}`;
+    }
+
+    // Tambah item transaksi ke daftar
+    function tambahTransaksi() {
+      const nama = document.getElementById('namaKasir').value.trim();
+      const tgl = document.getElementById('tanggalInput').value;
+      const akun = document.getElementById('akunKasir').value;
+      const jenis = document.getElementById('jenisTransaksi').value;
+
+      // Peringatan jika data diri kosong
+      if (!nama || !tgl || !akun || !jenis) {
+        showAlert("Peringatan: Kolom Nama, Tanggal, Akun Kasir, dan Jenis Transaksi belum diisi!");
+      } else {
+        hideAlert();
+      }
+
+      // Hitung subtotal input saat ini
+      const inputs = document.querySelectorAll('.input-x');
+      let subtotal = 0;
+      inputs.forEach(i => {
+        subtotal += (parseInt(i.value) || 0) * parseInt(i.getAttribute('data-val'));
+      });
+
+      if (subtotal === 0) {
+        showAlert("Silakan masukkan minimal satu nominal lembar/koin uang!");
+        return;
+      }
+
+      listData.push({ id: Date.now(), nama, tgl, akun, jenis, total: subtotal });
+      saveToStorage();
+      
+      // Reset bidang pecahan uang saja
+      inputs.forEach(i => i.value = '');
+      
+      renderList();
+      hitungTotalAkumulasi();
+    }
+
+    function hapusItem(id) {
+      listData = listData.filter(item => item.id !== id);
+      saveToStorage();
+      renderList();
+      hitungTotalAkumulasi();
+    }
+
+    function renderList() {
+      const box = document.getElementById('daftarTransaksi');
+      document.getElementById('totalItemBadge').innerText = `${listData.length} Item`;
+
+      if (listData.length === 0) {
+        box.innerHTML = `<p class="text-slate-400 italic text-center py-4">Belum ada item ditambahkan.</p>`;
+        return;
+      }
+
+      box.innerHTML = '';
+      listData.forEach((item) => {
+        box.innerHTML += `
+          <div class="flex justify-between items-center p-2.5 bg-slate-50 border border-slate-200 rounded-lg">
+            <div>
+              <p class="font-bold text-slate-700 text-xs">${item.jenis} <span class="font-normal text-slate-500">(${item.akun || 'Tanpa Akun'})</span></p>
+              <p class="text-[10px] text-slate-400">${item.nama || 'Tanpa Nama'} • ${item.tgl || '-'}</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-slate-800 text-xs">Rp ${item.total.toLocaleString('id-ID')}</span>
+              <button onclick="hapusItem(${item.id})" class="text-red-400 hover:text-red-600 font-bold px-1 no-print" title="Hapus">✕</button>
+            </div>
+          </div>`;
+      });
+    }
+
+    function saveToStorage() {
+      localStorage.setItem('rekapKasirData', JSON.stringify(listData));
+    }
+
+    function resetSemuaData() {
+      if (confirm("Apakah Anda yakin ingin menghapus semua rekap shift ini?")) {
+        listData = [];
+        localStorage.removeItem('rekapKasirData');
+        renderList();
+        hitungTotalAkumulasi();
+        hideAlert();
+      }
+    }
+
+    function showAlert(msg) {
+      const b = document.getElementById('alertBox');
+      document.getElementById('alertMessage').innerText = msg;
+      b.classList.remove('hidden');
+    }
+
+    function hideAlert() {
+      document.getElementById('alertBox').classList.add('hidden');
+    }
+
+    // Jalankan aplikasi saat halaman terbuka
+    initApp();
+  </script>
 
   <!-- Footer Container -->
-<footer class="social-footer-container">
-  
-  <!-- Row 1: Icon Social Media (Tiduran / Horizontal) -->
-  <div class="social-footer-bar">
-    <a href="https://www.linkedin.com/in/yudi-dwiranto-cs77" target="_blank" rel="noopener noreferrer" class="social-icon linkedin" aria-label="LinkedIn">
-      <i class="fab fa-linkedin-in"></i>
-      <span class="tooltip">LinkedIn</span>
-    </a>
+  <footer class="social-footer-container">
     
-    <a href="https://web.facebook.com/ydwiranto" target="_blank" rel="noopener noreferrer" class="social-icon facebook" aria-label="Facebook">
-      <i class="fab fa-facebook-f"></i>
-      <span class="tooltip">Facebook</span>
-    </a>
-    
-    <a href="https://www.instagram.com/cahsragen_77" target="_blank" rel="noopener noreferrer" class="social-icon instagram" aria-label="Instagram">
-      <i class="fab fa-instagram"></i>
-      <span class="tooltip">Instagram</span>
-    </a>
-    
-    <a href="https://wa.me/6281389188903?text=Assalamu.alaikum...%20Halo!%20Selamat%20[Pagi,%20Siang,%20Sore]%20Saya%20baru%20saja%20melihat%20web%20aplikasi%20Anda%20dan%20tertarik%20dengan%20solusinya.%20Kalau%20ada%20waktu%20luang,%20boleh%20kita%20mengobrol%20santai%20dulu%20untuk%20melihat%20potensi%20kerja%20sama%20ke%20depan%20?%20Terima%20kasih" target="_blank" rel="noopener noreferrer" class="social-icon whatsapp" aria-label="WhatsApp">
-      <i class="fab fa-whatsapp"></i>
-      <span class="tooltip">WhatsApp</span>
-    </a>
-    
-    <a href="https://id.shp.ee/yudmwbm1?fromSource=whatsapp&smtt=0.0.3" target="_blank" rel="noopener noreferrer" class="social-icon shopee" aria-label="Shopee">
-      <i class="fas fa-shopping-bag"></i>
-      <span class="tooltip">Shopee</span>
-    </a>
-    
-    <a href="https://www.tiktok.com/@selarasdirumah" target="_blank" rel="noopener noreferrer" class="social-icon tiktok" aria-label="TikTok">
-      <i class="fab fa-tiktok"></i>
-      <span class="tooltip">TikTok</span>
-    </a>
-  </div>
- <!-- Kolaborator & Hak Cipta -->
-  <div class="footer-credits">
-    Handcrafted with ❤️ by <strong>Andrew Dwiranto</strong> (Cah_Sragen_77, Indonesia)
-          
-  <div class="mt-1.5">
-    © 2026 Hak Cipta Dilindungi Undang-Undang
-  </div>
-</div>
-    
+    <!-- Row 1: Icon Social Media (Tiduran / Horizontal) -->
+    <div class="social-footer-bar">
+      <a href="https://www.linkedin.com/in/yudi-dwiranto-cs77" target="_blank" rel="noopener noreferrer" class="social-icon linkedin" aria-label="LinkedIn">
+        <i class="fab fa-linkedin-in"></i>
+        <span class="tooltip">LinkedIn</span>
+      </a>
+      
+      <a href="https://web.facebook.com/ydwiranto" target="_blank" rel="noopener noreferrer" class="social-icon facebook" aria-label="Facebook">
+        <i class="fab fa-facebook-f"></i>
+        <span class="tooltip">Facebook</span>
+      </a>
+      
+      <a href="https://www.instagram.com/cahsragen_77" target="_blank" rel="noopener noreferrer" class="social-icon instagram" aria-label="Instagram">
+        <i class="fab fa-instagram"></i>
+        <span class="tooltip">Instagram</span>
+      </a>
+      
+      <a href="https://wa.me/6281389188903?text=Assalamu.alaikum...%20Halo!%20Selamat%20[Pagi,%20Siang,%20Sore]%20Saya%20baru%20saja%20melihat%20web%20aplikasi%20Anda%20dan%20tertarik%20dengan%20solusinya.%20Kalau%20ada%20waktu%20luang,%20boleh%20kita%20mengobrol%20santai%20dulu%20untuk%20melihat%20potensi%20kerja%20sama%20ke%20depan%20?%20Terima%20kasih" target="_blank" rel="noopener noreferrer" class="social-icon whatsapp" aria-label="WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+        <span class="tooltip">WhatsApp</span>
+      </a>
+      
+      <a href="https://id.shp.ee/yudmwbm1?fromSource=whatsapp&smtt=0.0.3" target="_blank" rel="noopener noreferrer" class="social-icon shopee" aria-label="Shopee">
+        <i class="fas fa-shopping-bag"></i>
+        <span class="tooltip">Shopee</span>
+      </a>
+      
+      <a href="https://www.tiktok.com/@selarasdirumah" target="_blank" rel="noopener noreferrer" class="social-icon tiktok" aria-label="TikTok">
+        <i class="fab fa-tiktok"></i>
+        <span class="tooltip">TikTok</span>
+      </a>
+    </div>
 
-</footer>
+    <!-- Kolaborator & Hak Cipta -->
+    <div class="footer-credits">
+      Handcrafted with ❤️ by <strong>Andrew Dwiranto</strong> (Cah_Sragen_77, Indonesia)
+            
+      <div class="mt-1.5">
+        © 2026 Hak Cipta Dilindungi Undang-Undang
+      </div>
+    </div>
 
-<!-- Font Awesome CDN untuk icon -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  </footer>
 
+  <!-- Font Awesome CDN untuk icon -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </body>
 </html>
