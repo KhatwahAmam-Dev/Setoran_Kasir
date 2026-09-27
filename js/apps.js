@@ -1,4 +1,4 @@
-<script>
+
     const MODAL_TETAP = 500000;
     const kertasList = [100000, 75000, 50000, 20000, 10000, 5000, 2000, 1000];
     const koinList = [1000, 500, 200, 100, 50, 25];
@@ -163,4 +163,3 @@
 
     // Jalankan aplikasi saat halaman terbuka
     initApp();
-  </script>
